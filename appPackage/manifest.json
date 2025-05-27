@@ -1,0 +1,42 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.21/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.21",
+  "version": "1.0.0",
+  "id": "717ed000-9df2-4d31-98cb-24a93d223692",
+  "developer": {
+    "name": "KevinSprinklr",
+    "websiteUrl": "https://www.microsoft.com",
+    "privacyUrl": "https://www.microsoft.com/privacy",
+    "termsOfUseUrl": "https://www.microsoft.com/legal/terms-of-use"
+  },
+  "name": {
+    "short": "Hello World",
+    "full": "Hello World App for Microsoft Teams"
+  },
+  "description": {
+    "short": "Microsoft Teams hello world sample showcasing tabs, bots, and messaging.",
+    "full": " This Microsoft Teams Hello World sample app demonstrates the integration of tabs, bots, and messaging extensions using JavaScript, providing a comprehensive foundation for building interactive and engaging Teams applications. Experience the full capabilities of Teams by exploring features that enhance collaboration and productivity within the platform."
+  },
+  "icons": {
+    "outline": "outline.png",
+    "color": "color.png"
+  },
+   "bots": [
+    {
+      "botId": "717ed000-9df2-4d31-98cb-24a93d223692",
+      "scopes": ["personal", "groupChat", "team"],
+      "needsChannelSelector": false,
+      "supportsFiles": false,
+      "isNotificationOnly": false
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "accentColor": "#60A18E",
+  "validDomains": [
+    "7e41-14-98-125-202.ngrok-free.app",
+    "*ngrok-free.app"
+  ]
+}
