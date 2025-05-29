@@ -2,6 +2,7 @@
   "compilerOptions": {
     "declaration": true,
     "target": "es2016",
+    "resolveJsonModule": true,
     "module": "NodeNext",
     "outDir": "./lib",
     "rootDir": "./src",

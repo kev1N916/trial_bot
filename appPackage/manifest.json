@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.21/MicrosoftTeams.schema.json",
   "manifestVersion": "1.21",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "id": "717ed000-9df2-4d31-98cb-24a93d223692",
   "developer": {
     "name": "KevinSprinklr",
@@ -36,7 +36,7 @@
   ],
   "accentColor": "#60A18E",
   "validDomains": [
-    "7e41-14-98-125-202.ngrok-free.app",
+    "aaf7-203-110-85-250.ngrok-free.app",
     "*ngrok-free.app"
   ]
 }
