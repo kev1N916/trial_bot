@@ -4,26 +4,23 @@ import {
     CloudAdapter,
     ConfigurationBotFrameworkAuthentication,
     ConfigurationBotFrameworkAuthenticationOptions,
+    ConversationState,
     MemoryStorage,
-    UserState,
-    ConversationState
+    MessageFactory,
+    TurnContext
 } from 'botbuilder';
-import { MainDialog } from './dialogs/mainDialog';
-import { DialogBot } from './bots/dialogBot';
-import { TeamsBot } from './bots/userState_bot';
+import { InputCardBot } from './bots/inputBot';
 import { config } from 'dotenv';
-import { AdaptiveCardsBot } from './bots/adaptiveCardsBot';
-import { ProActiveBot } from './bots/proActiveBot';
+import { JsonDb } from './db/db';
+import { InputCardDialog } from './dialogs/inputCardDialog';
 const ENV_FILE = path.join(__dirname, '..', '.env');
+const DB_FILE = path.join(__dirname, '..', 'src','db');
+// console.log(DB_FILE)
 config({ path: ENV_FILE });
 
 // Create HTTP server.
 const server = restify.createServer();
 server.use(restify.plugins.bodyParser());
-server.listen(process.env.port || process.env.PORT || 3978, () => {
-    console.log(`\n${server.name} listening to ${server.url}`);
-    console.log('\nTo talk to your bot, open the emulator select "Open Bot"');
-});
 
 
 const botFrameworkAuthentication = new ConfigurationBotFrameworkAuthentication(process.env as ConfigurationBotFrameworkAuthenticationOptions);
@@ -32,7 +29,7 @@ const botFrameworkAuthentication = new ConfigurationBotFrameworkAuthentication(p
 const adapter = new CloudAdapter(botFrameworkAuthentication);
 
 // Catch-all for errors.
-const onTurnErrorHandler = async (context, error) => {
+const onTurnErrorHandler = async (context: TurnContext, error) => {
     // This check writes out errors to console log .vs. app insights.
     // application insights.
     console.error(`\n [onTurnError] unhandled error: ${error}`);
@@ -56,20 +53,22 @@ adapter.onTurnError = onTurnErrorHandler;
 // For local development, in-memory storage is used.
 // CAUTION: The Memory Storage used here is for local bot debugging only. When the bot
 // is restarted, anything stored in memory will be gone.
-// const memoryStorage = new MemoryStorage();
+const memoryStorage = new MemoryStorage();
 
 // // Create conversation state with in-memory storage provider.
-// const conversationState = new ConversationState(memoryStorage);
+const conversationState = new ConversationState(memoryStorage);
 // const userState = new UserState(memoryStorage);
 
 // // Create the main dialog.
-// const dialog = new MainDialog();
+const dialog = new InputCardDialog();
 // const myBot = new DialogBot(conversationState, userState, dialog);
 
 // Create the main dialog.
-const conversationReferences = {};
-const myBot = new ProActiveBot(conversationReferences);
+let conversationReferences = {};
+// const myBot = new ProActiveBot(conversationReferences);
 
+const myBot = new InputCardBot(dialog, conversationState, conversationReferences);
+const db = JsonDb
 // Listen for incoming requests.
 server.post('/api/messages', (req, res, next) => {
     console.log(`\nReceived request: ${req}`);
@@ -80,14 +79,18 @@ server.post('/api/messages', (req, res, next) => {
 server.get('/', (req, res, next) => {
     console.log(`\nReceived request: ${req}`);
     res.send({ message: 'Hello from your Restify API!' });
-  return next();
+    return next();
 })
 
 // Listen for incoming notifications and send proactive messages to users.
 server.get('/api/notify', (req, res, next) => {
     for (const conversationReference of Object.values(conversationReferences)) {
         adapter.continueConversationAsync(process.env.MicrosoftAppId, conversationReference, async (context) => {
-            await context.sendActivity('proactive hello');
+            // await context.sendActivity(MessageFactory.text('proactive hello'));
+
+            const message = MessageFactory.suggestedActions(['red', 'green', 'blue'], `Choose a color`)
+            await context.sendActivity(message);
+
         });
     }
     res.setHeader('Content-Type', 'text/html');
@@ -112,7 +115,18 @@ server.post('/api/notify', (req, res, next) => {
 });
 
 // Handle undefined routes
-server.get('*', (req, res,next) => {
+server.get('*', (req, res, next) => {
     res.json({ error: 'Route not found' });
     return next();
+});
+
+server.listen(process.env.port || process.env.PORT || 3978, () => {
+    const dbFile = path.join(DB_FILE,'db.json');
+    console.log(dbFile,"logging this now")
+    if (!db.exists(dbFile)) {
+        db.store(dbFile, {})
+    }
+    conversationReferences = db.load(dbFile)
+    console.log(`\n${server.name} listening to ${server.url}`);
+    console.log('\nTo talk to your bot, open the emulator select "Open Bot"');
 });
